@@ -1,0 +1,8 @@
+{
+  "appId": "com.enskygr.karanlikev",
+  "appName": "Karanlık Ev",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#000000"
+  }
+}

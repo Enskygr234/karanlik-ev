@@ -1,0 +1,58 @@
+name: APK Derle
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Paketleri kur
+        run: npm install
+
+      - name: Android projesini oluştur
+        run: |
+          npx cap add android
+          python3 scripts/patch-android.py
+          npx cap sync android
+
+      - name: APK derle
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../KaranlikEv.apk
+
+      - name: APK'yı yükle
+        uses: actions/upload-artifact@v4
+        with:
+          name: KaranlikEv-apk
+          path: KaranlikEv.apk
+
+      - name: İndirme sayfasına koy (Releases)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Karanlık Ev v1.0.${{ github.run_number }}
+          body: |
+            Telefondan **KaranlikEv.apk** dosyasına dokunup indir ve kur.
+            İlk kurulumda "bilinmeyen kaynaklara izin ver" demen gerekebilir.
+          files: KaranlikEv.apk

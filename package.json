@@ -1,0 +1,16 @@
+{
+  "name": "karanlik-ev",
+  "version": "1.0.0",
+  "description": "Karanlık Ev - mobil korku oyunu",
+  "private": true,
+  "scripts": {
+    "android": "npx cap add android && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Karanlık Ev</title>
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;touch-action:none;
+    -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
+    font-family:Georgia,"DejaVu Serif",serif;color:#d8d0c0}
+  canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
+  .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;background:radial-gradient(ellipse at center,#1a0606 0%,#000 70%);z-index:10;padding:20px;box-sizing:border-box}
+  .hidden{display:none!important}
+  h1{font-size:clamp(40px,9vw,88px);margin:0 0 8px;letter-spacing:6px;color:#b01515;
+    text-shadow:0 0 18px #600,0 0 2px #f33;animation:flick 4s infinite}
+  @keyframes flick{0%,92%,100%{opacity:1}93%{opacity:.3}95%{opacity:.9}96%{opacity:.2}}
+  p{margin:6px 0;color:#9a8f80;font-size:clamp(13px,2.4vw,18px);max-width:640px;line-height:1.45}
+  button{margin-top:22px;background:#2a0505;border:1px solid #7a1010;color:#eee;font:inherit;
+    font-size:22px;padding:12px 40px;border-radius:4px;letter-spacing:3px}
+  button:active{background:#5a0a0a}
+  #hud{position:fixed;top:10px;left:14px;right:14px;display:flex;justify-content:space-between;
+    font-size:15px;z-index:5;pointer-events:none;text-shadow:0 0 4px #000}
+  .bar{width:110px;height:8px;border:1px solid #555;margin-top:4px}
+  .bar i{display:block;height:100%;background:#d8c070}
+  #msg{position:fixed;bottom:22%;left:0;right:0;text-align:center;font-size:20px;color:#e0d6c0;
+    z-index:5;pointer-events:none;opacity:0;transition:opacity .6s;text-shadow:0 0 6px #000}
+  #runBtn{position:fixed;right:28px;bottom:34px;width:96px;height:96px;border-radius:50%;
+    border:2px solid rgba(200,60,60,.6);background:rgba(80,10,10,.35);z-index:6;color:#ddd;
+    display:flex;align-items:center;justify-content:center;font-size:16px;letter-spacing:2px}
+  #runBtn.on{background:rgba(160,20,20,.55)}
+  #scare{position:fixed;inset:0;z-index:20;background:#000}
+  .rotate{display:none}
+  @media (orientation:portrait) and (max-width:700px){ .rotate{display:block;color:#c55} }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="hud" class="hidden">
+  <div>Anahtar: <b id="keys">0</b>/3</div>
+  <div style="text-align:right">Fener<div class="bar"><i id="bat"></i></div>
+    <div style="margin-top:4px">Nefes</div><div class="bar"><i id="sta" style="background:#8aa"></i></div></div>
+</div>
+<div id="msg"></div>
+<div id="runBtn" class="hidden">KOŞ</div>
+<canvas id="scare" class="hidden"></canvas>
+
+<div id="menu" class="screen">
+  <h1>KARANLIK EV</h1>
+  <p>Gece yarısı. Kapı arkandan kilitlendi. Bu evde senden başka biri daha var.</p>
+  <p>3 anahtarı bul, çıkış kapısına ulaş. Fenerini ona tut, ışıktan hoşlanmıyor.</p>
+  <p style="font-size:13px;color:#777">Sol taraf: yürü · KOŞ: koş (ses çıkarır) · Kulaklık tak</p>
+  <p class="rotate">Telefonu yan çevir</p>
+  <button id="startBtn">BAŞLA</button>
+</div>
+
+<div id="over" class="screen hidden">
+  <h1 id="overTitle">YAKALANDIN</h1>
+  <p id="overText"></p>
+  <button id="againBtn">TEKRAR</button>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
