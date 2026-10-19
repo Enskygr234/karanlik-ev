@@ -15,9 +15,9 @@ document.body.appendChild(d); })();
 """
 
 with sync_playwright() as p:
-    b = p.chromium.launch()
+    b = p.chromium.launch(args=["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"])
     pg = b.new_page(viewport={"width": 1280, "height": 720}, device_scale_factor=1)
-    pg.goto("file://" + ROOT + "/www/index.html?trailer")
+    pg.goto("http://localhost:8765/index.html?trailer")
     pg.wait_for_timeout(500)
     pg.evaluate(CARD_JS)
     pg.evaluate("document.getElementById('menu').classList.add('hidden')")
@@ -54,33 +54,38 @@ with sync_playwright() as p:
     card("Gece yarısı.", 2.4)
     card("Kapı arkandan kilitlendi.", 2.6)
 
+    pg.evaluate("document.getElementById('grain').style.opacity='.05'")
     # 2) keşif: ilk anahtara gidiş
-    pg.evaluate("GAME.reset(); GAME.autopilot = true; const S=GAME.S; S.player.x = 3*48+24; S.player.y = 9*48+24; S.ghost.x = 26*48; S.ghost.y = 19*48; S.eventT = 99")
+    pg.evaluate("GAME.reset(); GAME.autopilot = true; const S=GAME.S; S.player.x = 3*2+1; S.player.z = 9*2+1; S.ghost.x = 52; S.ghost.z = 38; S.eventT = 99; S.appT = 99")
     hud(True)
     play(7.0)
     hud(False)
 
     card("Bu evde yalnız değilsin.", 2.6, flicker=True)
 
-    # 3) yaklaşan hayalet - fener ona dönük, oyuncu donmuş
+    # 3) koridorun sonundan yaklaşan hayalet
     setup = """
-      GAME.reset(); const S = GAME.S; GAME.autopilot = false; S.eventT = 99;
-      S.player.x = 20*48+24; S.player.y = 14*48+24; S.player.ang = 0; S.battery = 60;
-      S.ghost.x = 28*48+24; S.ghost.y = 14*48+24; S.ghost.mode='chase'; S.ghost.chaseT=9; S.ghost.last={x:20,y:14};
-      GAME.input.dx = 0; GAME.input.dy = 0; GAME.input.run = false;
+      GAME.reset(); const S = GAME.S; GAME.autopilot = true; GAME.stand = true; GAME.lockLook = true; GAME.noSlow = true;
+      S.eventT = 99; S.appT = 99;
+      S.player.x = 20*2+1; S.player.z = 14*2+1; S.player.yaw = -Math.PI/2; S.player.pitch = 0.02; S.battery = 70;
+      S.ghost.x = 26*2+1; S.ghost.z = 14*2+1; S.ghost.mode='chase'; S.ghost.chaseT=30; S.ghost.last={x:20,y:14};
     """
     hud(True)
-    play(3.2, setup, "GAME.S.player.ang = Math.atan2(GAME.S.ghost.y-GAME.S.player.y, GAME.S.ghost.x-GAME.S.player.x); GAME.S.ghost.lit=false")
+    play(3.4, setup, "GAME.S.ghost.chaseT = 30")
 
-    # 4) kaçış - karanlıkta kırmızı gözler
+    # 4) kaçış ve arkaya bakış
     setup = """
-      GAME.reset(); const S = GAME.S; GAME.autopilot = true; GAME.forceRun = true; S.eventT = 99;
-      S.keys[0].got = true; S.keys[1].got = true; S.keysGot = 2;
-      S.player.x = 4*48+24; S.player.y = 14*48+24;
-      S.ghost.x = 9*48+24; S.ghost.y = 13*48+24; S.ghost.mode='chase'; S.ghost.chaseT=30;
+      GAME.reset(); const S = GAME.S; GAME.stand = false; GAME.lockLook = false; GAME.noSlow = false; GAME.forceRun = true;
+      S.eventT = 99; S.appT = 99;
+      S.player.x = 5*2+1; S.player.z = 14*2+1; S.player.yaw = Math.PI/2;
+      S.ghost.x = 11*2+1; S.ghost.z = 14*2+1; S.ghost.mode='chase'; S.ghost.chaseT=30;
+      GAME.target = {x: 1*2+1, z: 14*2+1};
     """
-    play(4.5, setup, "GAME.S.player.stam = 100; GAME.S.ghost.chaseT = 30")
+    play(2.0, setup, "GAME.S.player.stam = 100; GAME.S.ghost.chaseT = 30")
+    pg.evaluate("GAME.lockLook = true; GAME.forceRun = false")
+    play(2.3, None, "const S=GAME.S; const want=Math.atan2(-(S.ghost.x-S.player.x), -(S.ghost.z-S.player.z)); let d=want-S.player.yaw; while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI; S.player.yaw += d*0.12; S.ghost.chaseT=30; GAME.stand=true")
     hud(False)
+    pg.evaluate("GAME.target=null; GAME.stand=false; GAME.lockLook=false")
 
     # 5) hızlı kesmeler: siyah / kırmızı flaş
     pg.evaluate("""const c=document.getElementById('card'); c.style.display='flex';
